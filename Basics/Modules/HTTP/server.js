@@ -31,6 +31,38 @@ const server = http.createServer((req, res) => {
                     res.end(JSON.stringify(todos))
                 }
             }
+
+            // GET /todos/:id
+            if (method === 'GET' && url.match(/todos\/([0-9]+)/)) {
+                let id = parseInt(req.url.split("/")[2]);
+                let data = todos.filter(each => each.id === id)
+                res.end(JSON.stringify(data))
+            }
+
+
+            // put /todos/:id
+            if (method === 'PUT' && url.match(/todos\/([0-9]+)/)) {
+                let id = parseInt(req.url.split("/")[2]);
+                const { text } = JSON.parse(body);
+                for (let index = 0; index < todos.length; index++) {
+                    if (id === todos[index].id) {
+                        todos[index].text = text
+                    }
+                }
+                res.end(JSON.stringify(todos))
+            }
+
+
+            // delete /todos/:id
+            if (method === 'DELETE' && url.match(/todos\/([0-9]+)/)) {
+                let id = parseInt(req.url.split("/")[2]);
+                for (let index = 0; index < todos.length; index++) {
+                    if (id === todos[index].id) {
+                        todos.splice(index, 1)
+                    }
+                }
+                res.end(JSON.stringify(todos))
+            }
         })
 
 

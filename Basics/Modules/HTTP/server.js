@@ -13,13 +13,21 @@ const server = http.createServer((req, res) => {
         })
         .on('end', () => {
             body = Buffer.concat(body).toString()
-            if (method === 'GET' && url === '/') {
 
-                res.end("<h1>Todo API</h1>")
+            let status = 404;
+            const response = {
+                success: false,
+                data: null,
+            };
+            if (method === 'GET' && url === '/') {
+                status = 200;
+                response.success = true;
+                response.data = "<h1>Todo API</h1>"
             }
             if (method === 'GET' && url === '/todos') {
-
-                res.end(JSON.stringify(todos))
+                status = 200;
+                response.success = true;
+                response.data = todos;
             }
 
             if (method === 'POST' && url === '/todos') {
@@ -28,7 +36,9 @@ const server = http.createServer((req, res) => {
                     res.end("no data sent ")
                 } else {
                     todos.push({ id, text })
-                    res.end(JSON.stringify(todos))
+                    status = 201;
+                    response.success = true;
+                    response.data = todos;
                 }
             }
 
@@ -36,7 +46,9 @@ const server = http.createServer((req, res) => {
             if (method === 'GET' && url.match(/todos\/([0-9]+)/)) {
                 let id = parseInt(req.url.split("/")[2]);
                 let data = todos.filter(each => each.id === id)
-                res.end(JSON.stringify(data))
+                status = 200;
+                response.success = true;
+                response.data = data;
             }
 
 
@@ -44,12 +56,16 @@ const server = http.createServer((req, res) => {
             if (method === 'PUT' && url.match(/todos\/([0-9]+)/)) {
                 let id = parseInt(req.url.split("/")[2]);
                 const { text } = JSON.parse(body);
+                let data;
                 for (let index = 0; index < todos.length; index++) {
                     if (id === todos[index].id) {
                         todos[index].text = text
+                        data = todos[index]
                     }
                 }
-                res.end(JSON.stringify(todos))
+                status = 204;
+                response.success = true;
+                response.data = data;
             }
 
 
@@ -61,11 +77,18 @@ const server = http.createServer((req, res) => {
                         todos.splice(index, 1)
                     }
                 }
-                res.end(JSON.stringify(todos))
+                status = 201;
+                response.success = true;
+                response.data = todos;
             }
+
+            res.writeHead(status, {
+                'Content-Type': 'application/json',
+                'X-Powered-By': 'Node.js',
+            });
+
+            res.end(JSON.stringify(response));
         })
-
-
 
 });
 server.listen(3000, () => console.log("server running on port 3000"))

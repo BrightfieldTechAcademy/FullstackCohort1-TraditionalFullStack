@@ -1,0 +1,19 @@
+<h1>Bio information of users</h1>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col">Username</th>
+      <th scope="col">Email</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+        {{#each  data}}
+          <th scope="row">{{this.name}}</th>
+            <td>{{this.username}}</td>
+            <td>{{this.email}}</td>
+          </tr>
+        {{/each }}
+    </tbody>
+</table>

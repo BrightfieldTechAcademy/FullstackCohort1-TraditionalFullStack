@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Express • TodoMVC</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+
+<body>
+    <section class="todoapp">
+        <nav class="nav">
+            <ul>
+                <li class="user">
+                    <%= user.name || user.username || user.email %>
+                </li>
+                <li>
+                    <form action="/logout" method="post">
+                        <button class="logout" type="submit">Sign out</button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+        <header class="header">
+            <h1>Posts</h1>
+            <table>
+                <% for(var i=0; i < data.length; i++) { %>
+                    <tr>
+                        <td>
+                            <%= data[i].id %>
+                        </td>
+                        <td>
+                            <%= data[i].name %>
+                        </td>
+                    </tr>
+                    <% } %>
+            </table>
+        </header>
+
+</body>
+
+</html>

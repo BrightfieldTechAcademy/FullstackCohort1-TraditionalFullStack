@@ -1,8 +1,32 @@
-const express = require('express'); // Include ExpressJS
-const app = express(); // Create an ExpressJS app
-const bodyParser = require('body-parser'); // Middleware
+const express = require('express'); // server software
+const bodyParser = require('body-parser'); // parser middleware
+const session = require('express-session'); // session middleware
+const passport = require('passport'); // authentication
+const connectEnsureLogin = require('connect-ensure-login'); // authorization
 
+const User = require('./user.js'); // User Model
+
+const app = express();
+
+// Configure Sessions Middleware
+app.use(session({
+    secret: 'r8q,+&1LM3)CD*zAGpx1xm{NeQhc;#',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
+}));
+
+// Configure Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Passport Local Strategy
+passport.use(User.createStrategy());
+
+// To use with sessions
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 // Route to Homepage
 app.get('/', (req, res) => {
@@ -14,14 +38,33 @@ app.get('/login', (req, res) => {
     res.sendFile(__dirname + '/static/login.html');
 });
 
-app.post('/login', (req, res) => {
-    // Insert Login Code Here
-    let username = req.body.username;
-    let password = req.body.password;
-    res.send(`Username: ${username} Password: ${password}`);
+// Route to Dashboard
+app.get('/dashboard', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
+    res.send(`Hello ${req.user.username}. Your session ID is ${req.sessionID} 
+  and your session expires in ${req.session.cookie.maxAge} 
+  milliseconds.<br><br>
+  <a href="/logout">Log Out</a><br><br><a href="/secret">Members Only</a>`);
 });
 
-const port = 3000 // Port we will listen on
+// Route to Secret Page
+app.get('/secret', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
+    res.sendFile(__dirname + '/static/secret-page.html');
+});
 
-// Function to listen on the port
+// Route to Log out
+app.get('/logout', function(req, res) {
+    req.logout(function(err) {
+        if (err) { return next(err); }
+        res.redirect('/');
+    });
+});
+
+// Post Route: /login
+app.post('/login', passport.authenticate('local', { failureRedirect: '/' }), function(req, res) {
+    console.log(req.user)
+    res.redirect('/dashboard');
+});
+
+// assign port
+const port = 3000;
 app.listen(port, () => console.log(`This app is listening on port ${port}`));
